@@ -1,0 +1,25 @@
+Concept: Why agents need graphs. State, nodes, edges, and conditional
+routing. The difference between a chain (linear) and a graph (branching,
+looping).
+
+A chain cannot make dynamic decisions well.
+Agents are NOT fixed pipelines.
+They are decision-making systems.
+They need:
+-branching
+-loops
+-retries
+-tool calling
+-memory
+-conditional routing
+That becomes a GRAPH.
+
+A graph has:
+State = current data/memory
+Nodes = individual actions/tasks
+Edges = connections between nodes
+Conditional Routing	= choosing next path dynamically
+
+SIMPLE DIFFERENCE
+Chain - Do these exact steps.
+Graph - Figure out what to do next.

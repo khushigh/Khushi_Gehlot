@@ -1,0 +1,275 @@
+SECTION A-
+
+ANS 1-
+A list is ordered, mutable, and allows duplicate values.
+You would use a list when you need to store and modify a collection of items, like a list of student names.
+
+A tuple is ordered but immutable, meaning its values cannot be changed after creation.
+You would use a tuple for fixed data such as coordinates (x, y) or RGB color values.
+
+A set is unordered and stores only unique values.
+You would use a set when you want to remove duplicates or quickly check membership, like unique tags or IDs.
+
+A dict stores data as key–value pairs.
+You would use a dictionary when each value needs a label/key, such as storing user details like {"name": "Khushi", "age": 20}.
+
+ANS 2-
+result = [ x * x for x in range(1,21) if x % 2 == 0 ]
+
+ANS 3-
+import json
+
+def read_json_safely(path):
+    try:
+	with open("path", "r") as file:
+	    return json.load(file)
+
+    except FileNotFoundError:
+        return {}
+
+    except json.JSONDecodeError:
+        return None
+
+ANS 4-
+a) 79 Char per line
+b) snake_case naming
+c) PascalCase naming
+d) 4 spaces per level
+e) 2 blank line
+
+ANS 5-
+mkdir expense-tracker
+cd expense-tracker
+python3 -m venv venv
+source venv/bin/activate
+pip install requests
+pip install pydantic
+
+
+SECTION B-
+
+ANS 6- 
+import requests
+
+def get_json(url):
+    response = requests.get(url)
+    if response.status_code != 200:
+        print(f"Error: Request failed with status {response.status_code}")
+        exit()
+    return response.json()
+
+
+def main():
+    url = "https://api.github.com/users/anthropics"
+    data = get_json(url)
+    print(f"Name: {data['name']}")
+    print(f"Public repos: {data['public_repos']}")
+    print(f"Followers: {data['followers']}")
+
+
+if __name__ == "__main__":
+    main()
+
+
+ANS 7-
+Hard-coding an API key is unsafe because if the code is shared or pushed to GitHub, anyone can steal and misuse the key.
+
+Recommended approach:
+store secrets in a .env file & use the python-dotenv package to load them securely
+
+import os
+from dotenv import load_dotenv
+load_dotenv()
+api_key = os.getenv("OPENAI_API_KEY")
+
+
+ANS 8-
+from pydantic import BaseModel, Field
+from typing import List
+
+class WeatherReport(BaseModel):
+    city: str = Field(min_length=1)
+    temperature_c: float = Field(ge=-50, le=60)
+    humidity: int = Field(ge=0, le=100)
+    conditions: List[str]
+
+
+ANS 9-
+Analogy for async/await = you're making coffee (it takes 5 mins) you wait there do nothing 
+then you're roasting bagels (it takes 3 mins) you wait there and do nothing else
+so it took you 8 mins 
+but async/ awaits says while you wait for coffee you could roast bagels and it will take you 5 mins
+
+import httpx
+import asyncio
+
+async def fetch(url):
+    async with httpx.AsyncClient(timeout=10) as client:
+        r = await client.get(url)
+        r.raise_for_status()
+        return r.json()
+
+
+ANS 10-
+
+npm create vite@latest intern-app --template react
+cd intern-app
+npm install
+npm run dev
+
+
+ANS 11-
+class -> className
+<p> -> </p>
+onclick -> onClick
+didn't export default ProfileCard;
+semicolon missing after return ();
+
+
+ANS 12-
+src/components/Badge.jsx-
+
+function Badge({ label, color = "#2E75B6" }){
+    return (
+	<span style = {{backgroundColour: color, color: "white"}}>
+	{label}
+	</span>
+    );
+}
+export default Badge;
+
+src/App.js-
+
+import Badge from './components/Badge.jsx';
+
+function App() {
+  return (
+    <div>
+      <Badge label="Akshit" color="blue" />
+      <Badge label="Hitesh" color="green" />
+      <Badge label="Keshav" />
+    </div>
+  );
+}
+
+
+ANS 13-
+Props are data passed from a parent component to a child component.
+Props are read-only and cannot be changed by the child component.
+State is data stored inside a component and can change over time.
+When state changes, the component renders again automatically.
+
+Eg of props:
+A ProfileCard component receiving name="Khushi" from its parent.
+
+Eg of state:
+A counter component storing count and updating it when a button is clicked using setCount().
+
+ANS 14-
+import {useState} from 'react'
+
+function Counter(){
+	const [count, setCount] = useState(0);
+    return (
+        <div className="Container" style={{margin:'20px'}}>
+            <button onClick={() => setCount(count + 1)}>
+                +1</button>
+            <button onClick={() => count > 0 && setCount(count - 1)}>
+                -1</button>
+            <button onClick={() => setCount(0)}>
+                Reset</button> 
+	    <p>Count = {count}</p> 
+        </div>
+    );
+}
+export default Counter;
+
+
+ANS 15-
+seEffect missing dependency array [] 
+Missing key prop inside .map()
+
+correct cdoe =
+function UserList() {
+	const [users, setUsers] = useState([])
+	useEffect(() => {
+		fetch("https://api.example.com/users")
+		.then(r => r.json())
+		.then(data => setUsers(data))
+	},[])
+	return (
+		<ul>
+		  {users.map(u => (<li key={u.id}>{u.name}</li>))}
+		</ul>
+	);
+}
+
+ANS 16-
+import { useState, useEffect } from "react";
+
+function SearchableList() {
+  const [users, setUsers] = useState([]);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("https://jsonplaceholder.typicode.com/users")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch users");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setUsers(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  const filteredUsers = users.filter((user) =>
+    user.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (error) {
+    return <p>Error: {error}</p>;
+  }
+
+  return (
+    <div>
+      <input
+        type="text"
+        placeholder="Search users"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
+      {filteredUsers.length === 0 ? (
+        <p>No users found</p>
+      ) : (
+        <ul>
+          {filteredUsers.map((user) => (
+            <li key={user.id}>{user.name}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+export default SearchableList;
+
+
+
+
+
+
+

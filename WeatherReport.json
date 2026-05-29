@@ -1,0 +1,45 @@
+{
+  "coord": {
+    "lon": 75.8167,
+    "lat": 26.9167
+  },
+  "weather": [
+    {
+      "id": 721,
+      "main": "Haze",
+      "description": "haze",
+      "icon": "50n"
+    }
+  ],
+  "base": "stations",
+  "main": {
+    "temp": 306.77,
+    "feels_like": 304.8,
+    "temp_min": 306.77,
+    "temp_max": 306.77,
+    "pressure": 1001,
+    "humidity": 21,
+    "sea_level": 1001,
+    "grnd_level": 955
+  },
+  "visibility": 3500,
+  "wind": {
+    "speed": 3.6,
+    "deg": 300
+  },
+  "clouds": {
+    "all": 0
+  },
+  "dt": 1779226682,
+  "sys": {
+    "type": 1,
+    "id": 9170,
+    "country": "IN",
+    "sunrise": 1779235616,
+    "sunset": 1779284389
+  },
+  "timezone": 19800,
+  "id": 1269515,
+  "name": "Jaipur",
+  "cod": 200
+}

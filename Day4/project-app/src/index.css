@@ -1,0 +1,169 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background-color: #b3c5e0;
+    padding: 20px;
+}
+
+.app {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.header h1 {
+    font-size: 2rem;
+    color: #03036e;
+    margin-bottom: 8px;
+}
+
+.header p {
+    color: #666;
+    font-size: 1rem;
+    margin-bottom: 12px;
+}
+
+
+.error-box {
+    background: #fff0f0;
+    color: #e74c3c;
+}
+
+.search-box {
+    margin-top: 16px;
+    padding: 10px 20px;
+    width: 100%;
+    max-width: 400px;
+    border: 2px solid #e0e0e0;
+    border-radius: 25px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.search-box:focus {
+    border-color: #4a90e2;
+}
+
+.no-results {
+    text-align: center;
+    color: #888;
+    font-size: 1.1rem;
+    margin-top: 40px;
+}
+
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-image {
+    width: 90px;
+    height: auto;
+    border-radius: 10%;
+    margin-bottom: 12px;
+   
+    
+    padding: 4px;
+}
+
+
+.card-name {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #1a1a2e;
+    margin-bottom: 4px;
+}
+
+.card-role {
+    color: #4a90e2;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+}
+
+.card-city {
+    color: #888;
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+}
+
+
+
+.view-btn {
+    padding: 8px 20px;
+    background: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+}
+
+.view-btn:hover {
+    background: #357abd;
+}
+
+.view-btn.clicked {
+    background: #27ae60;
+}
+
+@media (max-width: 768px) {
+    .gallery {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .gallery {
+        grid-template-columns: 1fr;
+    }
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 14px;
+    flex-wrap: wrap;
+}
+
+.role-select {
+   margin-top: 16px;
+    padding: 10px 20px;
+    width: 10%;
+    max-width: 400px;
+    border: 2px solid #e0e0e0;
+    border-radius: 25px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.role-select:focus {
+    border-color: #4a90e2;
+}

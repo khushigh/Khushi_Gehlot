@@ -1,0 +1,11 @@
+============================================================
+WEATHER REPORT — generated 2026-05-20 19:33:31
+============================================================
+
+City:        Jaipur
+Temperature: 38.62 °C
+Humidity:    12%
+Pressure:    1000 hPa
+Condition:   Haze
+Description: haze
+Wind Speed:  4.63 m/s
