@@ -1,0 +1,322 @@
+Q1.
+In 4–6 sentences, explain why RAG exists. What two specific problems with vanilla LLMs does it
+solve, and how does adding a retrieval step fix them?
+
+Ans1.
+RAG (Retrieval-Augmented Generation) exists because vanilla LLMs did not have reliable access to up-to-date external knowledge, and they often hallucinate facts when unsure. Traditional LLMs generate answers only from the data they were trained on, so they may give outdated, incomplete, or incorrect information. RAG solves this by adding a retrieval step before generation, where the system searches a knowledge base, database, or documents for relevant information related to the user’s query. The retrieved content is then provided to the LLM as additional context, allowing it to generate answers grounded in real sources instead of relying only on memorized patterns. This improves factual accuracy, reduces hallucinations, and enables the model to work with private or constantly changing data without retraining the entire LLM.
+
+
+Q2.
+Define each of the following in ONE clear sentence each:
+(a) Embedding
+(b) Vector similarity (and the metric most commonly used)
+(c) Chunk size
+(d) Chunk overlap
+(e) top-k retrieval
+
+Ans2.
+(a) Embedding: Embedding is a vector (int) representation of text that captures its semantic meaning so similar texts are placed closer together in vector space.
+
+(b) Vector similarity : Vector similarity measures how close or related two embeddings are, and the most commonly used metric is cosine similarity.
+
+(c) Chunk size: Chunk size is the amount of text grouped together into a single segment before storing or processing it in a RAG system.
+
+(d) Chunk overlap: Chunk overlap is the repeated portion of text shared between consecutive chunks to preserve context across boundaries.
+
+(e) top-k retrieval: Top-k retrieval is the process of selecting the k most relevant chunks or documents from a vector database based on similarity to the query embedding.
+
+Q3.
+You have a 200-page PDF policy manual where most answers fit in 1–2 paragraphs. A colleague
+picks chunk_size=2000 and chunk_overlap=0. List THREE things that will go wrong with retrieval
+quality, and suggest specific better values for chunk_size and chunk_overlap with a one-sentence
+justification.
+
+Ans3. 3 things that will go wrong are:
+1) Chunks too large resulting in unrelated information in every chunk
+2) overlap = 0 is wrong because if one topic gets split between two chunks, some important context can be lost and retrieval may miss the correct answer.
+3) Large chunks also make embeddings less accurate because the meaning of many different topics gets mixed into one vector.
+better values = chunk_size = 400/500, chunk overlap = 70/80
+
+
+Q4.
+Write a minimal Python script (no LangChain) that:
+- loads a list of 3 short documents (you can hard-code them),
+- generates an embedding for each using any embedding model of your choice (you may import openai,
+sentence_transformers, or pseudocode the embed() call but the rest of the code must be real),
+- stores them in a Chroma collection,
+- given a query string, retrieves the top-2 most similar documents and prints them.
+Focus on the actual chromadb API calls (client, collection, add, query). Code must run end-to-end if
+the embed() call is real.
+
+Ans4.
+import chromadb
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("all-MiniLM-L6-v2")
+
+documents = [
+    "Dogs are cute", "Machine learning is a branch of artificial intelligence.","ChromaDB is used for storing vector embeddings."
+]
+
+embeddings = model.encode(documents).tolist()
+client = chromadb.Client()
+collection = client.create_collection(name="Khushi_collection")
+
+collection.add(
+    documents=documents,
+    embeddings=embeddings,
+    ids=["1", "2", "3"])
+
+query = "What is AI?"
+query_embedding = model.encode([query]).tolist()
+
+results = collection.query(
+    query_embeddings=query_embedding,
+    n_results=2
+)
+
+print("Top 2 Results:")
+for doc in results["documents"][0]:
+    print("-", doc)
+
+
+
+Q5.
+After building a RAG pipeline, the answers sometimes look correct but reference facts that are not
+in the source documents. Name this failure mode and list THREE concrete things you would do to
+reduce it (changes to retrieval, prompt, or evaluation)
+Ans5.
+This failure is called hallucination, where the model gives information that looks correct but is not actually present in the documents.
+
+To reduce it:
+Retrieve better and more relevant chunks by improving chunk size, overlap, or top-k retrieval.
+Give strict prompts such as “Answer only from the given context. If information is missing, say you don’t know.”
+Evaluate the output by checking whether the generated answer matches the retrieved source documents and contains supported facts only.
+
+
+Ans6.
+LCEL stands for LangChain Expression Language. It is a way to build LangChain workflows by chaining components together in a simple and readable format. It allows prompts, models, parsers, retrievers, and other components to work together as a pipeline. The | operator passes the output of one component directly as the input to the next component. LCEL is preferred over manually using multiple .invoke() calls because the code becomes shorter, cleaner, easier to debug, and easier to scale for larger pipelines.
+
+Ans7.
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_mistralai import ChatMistralAI
+
+model = ChatMistralAI(model="mistral-small-latest")
+prompt = ChatPromptTemplate.from_template(
+    "Write a one-sentence tagline for: {topic}"
+)
+
+parser = StrOutputParser()
+
+chain = prompt | model | parser
+
+result = chain.invoke({"topic": "electric scooters"})
+
+print(result)
+
+Ans8.
+from pydantic import BaseModel, Field
+from langchain_core.prompts import PromptTemplate
+from langchain_core.output_parsers import PydanticOutputParser
+from langchain_mistralai import ChatMistralAI
+
+
+class MovieReview(BaseModel):
+    title: str
+    rating: int = Field(description="Rating from 1 to 10")
+    one_line_review: str
+
+
+parser = PydanticOutputParser(pydantic_object=MovieReview)
+prompt = PromptTemplate(
+    template="""
+Generate a movie review.
+
+{format_instructions}
+
+Movie: {movie}
+""",
+    input_variables=["movie"],
+    partial_variables={
+        "format_instructions": parser.get_format_instructions()
+    }
+)
+
+model = ChatMistralAI(model="mistral-small-latest")
+chain = prompt | model | parser
+
+
+result = chain.invoke({"movie": "Inception"})
+
+print(result)
+
+Ans9.
+from dotenv import load_dotenv
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_chroma import Chroma
+
+from langchain_mistralai import ChatMistralAI
+
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+
+load_dotenv()
+
+
+loader = PyPDFLoader("Project/ML.pdf")
+
+documents = loader.load()
+
+
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size=500,
+    chunk_overlap=100
+)
+
+docs = splitter.split_documents(documents)
+
+
+embedding_model = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
+)
+
+vectorstore = Chroma.from_documents(
+    documents=docs,
+    embedding=embedding_model,
+    persist_directory="./chroma_db"
+)
+
+retriever = vectorstore.as_retriever(
+    search_kwargs={"k": 3}
+)
+
+llm = ChatMistralAI(
+    model="mistral-small-latest",
+    temperature=0
+)
+
+prompt = ChatPromptTemplate.from_template(
+    """
+Answer the question ONLY using the provided context.
+
+Context:
+{context}
+
+Question:
+{question}
+"""
+)
+
+while True:
+
+    question = input("\nYou: ")
+
+    if question.lower() == "exit":
+        exit()
+
+    retrieved_docs = retriever.invoke(question)
+
+    context = "\n".join(
+        [doc.page_content for doc in retrieved_docs]
+    )
+
+    chain = (
+        prompt
+        | llm
+        | StrOutputParser()
+    )
+
+    answer = chain.invoke({
+        "context": context,
+        "question": question
+    })
+
+    print("\nAnswer:")
+    print(answer)
+
+    print("\nSources:")
+
+    for i, doc in enumerate(retrieved_docs):
+
+        print(f"\nSource {i+1}")
+        print(doc.metadata)
+
+Ans10.
+A chain is a linear sequence of steps where the output of one step becomes the input of the next step in a fixed order. A graph is more flexible because it allows branching, looping, and decision-making between different paths. Chains are useful for simple workflows like prompt to model to parser while graphs are better for dynamic AI systems and agents. In a graph, the next step can change depending on the current state or model output. For eg- a graph can repeatedly call a tool in a loop until enough information is collected which a normal chain cannot do easily.
+
+Ans11.
+State: State is the shared data object that stores information used and updated by all nodes in the graph.
+Nodes: Nodes are functions or operations that perform some task using the current state.
+Edges: Edges define the fixed path from one node to another.
+Conditional edges: Conditional edges choose the next node dynamically based on conditions or the current state.
+
+Ans12.
+from typing import TypedDict, List
+from langgraph.graph import StateGraph, START, END
+
+class MyState(TypedDict):
+    messages: List[str]
+
+def greet(state: MyState):
+    state["messages"].append("Hello!")
+    return state
+
+def farewell(state: MyState):
+    state["messages"].append("Goodbye!")
+    return state
+
+builder = StateGraph(MyState)
+
+builder.add_node("greet", greet)
+builder.add_node("farewell", farewell)
+
+builder.add_edge(START, "greet")
+builder.add_edge("greet", "farewell")
+builder.add_edge("farewell", END)
+
+graph = builder.compile()
+
+result = graph.invoke({"messages": []})
+
+print(result)
+
+Ans13.
+State contains the user query, conversation messages, tool result, final answer, and number of tool calls.
+
+The graph starts from the agent node.
+
+The agent node checks the query:
+- if it can answer directly, it sends the flow to the end node
+- if extra information is needed, it sends the flow to the tool node
+
+The tool node performs a search using the query and stores the retrieved result in the state.
+
+After the search is completed, the flow goes back to the agent node so it can generate a better answer using the tool result.
+
+The graph ends when the final answer is generated or when the maximum number of tool calls is reached to avoid infinite loops.
+
+Ans14.
+MCP (Model Context Protocol) solves the problem of connecting AI models with external tools, data, and systems in a standard way. Instead of creating separate integrations for every application & MCP provides one common protocol for communication. The host is the application that the user interacts with, the client manages communication between the host and MCP servers & the server exposes capabilities to the model. An MCP server can expose tools that perform actions, resources that provide data or files, and prompts that give reusable instructions or workflows. This makes AI systems easier to reuse, and connect with different services.
+
+Ans15.
+MCP Tool: A tool performs an action or computation, for example a calculator tool that adds two numbers.
+MCP Resource: A resource provides data or content for the model to read, for example a PDF policy document or database record.
+
+Ans16.
+from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP("WordCountServer")
+
+def word_count(text: str) -> int:
+    """Count the number of words in a string."""
+    return len(text.split())
+
+mcp.run()
+
+Ans17.
+1)MCP provides a standard way to connect tools and data sources, so the same server can work with different AI applications without rewriting integrations every time.
+2) MCP supports more than just function calling because it can also expose reusable resources and prompts, making AI systems easier to organise and scale.

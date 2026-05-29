@@ -1,0 +1,1 @@
+Embeddings are vector representations of text that capture semantic meaning. Similar texts produce similar vectors. Vector databases like Chroma store embeddings for efficient semantic search and retrieval.
